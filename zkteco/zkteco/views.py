@@ -60,3 +60,22 @@ def delete_person_level(request):
         "delete_person_level.html",
         {"result": result, "error": error},
     )
+
+
+def get_person(request):
+    """Retrieve person info by pin and display the result."""
+    result = None
+    error = None
+
+    if request.method == "POST":
+        pin = request.POST.get("pin", "").strip()
+        if not pin:
+            error = "pin is required"
+        else:
+            client = ZKBioClient()
+            try:
+                result = client.get(f"api/person/get/{pin}")
+            except Exception as exc:
+                error = str(exc)
+
+    return render(request, "get_person.html", {"result": result, "error": error})
