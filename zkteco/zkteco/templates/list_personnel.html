@@ -60,6 +60,7 @@
                         <th>Email</th>
                         <th>Placa</th>
                         <th>Deshabilitado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,6 +77,13 @@
                             <td>{{ person.email }}</td>
                             <td>{{ person.carPlate }}</td>
                             <td>{{ person.isDisabled }}</td>
+                            <td>
+                                <form method="post" action="{% url 'delete_person' %}" class="delete-form d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="pin" value="{{ person.pin }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -94,12 +102,48 @@
 
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const table = document.getElementById('personTable');
             if (table) {
                 new DataTable(table);
             }
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const f = this;
+                    Swal.fire({
+                        title: '¿Eliminar usuario?',
+                        text: '¿Estás seguro que deseas eliminar este usuario?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(f.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': f.querySelector('[name=csrfmiddlewaretoken]').value
+                                },
+                                body: new FormData(f)
+                            })
+                            .then(resp => resp.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire('Eliminado', 'Usuario eliminado correctamente', 'success');
+                                    f.closest('tr').remove();
+                                } else {
+                                    Swal.fire('Error', data.message || 'No se pudo eliminar', 'error');
+                                }
+                            })
+                            .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+                        }
+                    });
+                });
+            });
         });
     </script>
 {% endblock %}
