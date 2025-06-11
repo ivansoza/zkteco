@@ -5,6 +5,11 @@
 </head>
 <body>
     <h1>Bienvenido a la zona de pruebas para ZKTeco</h1>
+    {% if token %}
+    <p>Conexión con ZKTeco establecida con éxito.<br>Token: {{ token }}</p>
+    {% elif error %}
+    <p>Error al establecer la conexión: {{ error }}</p>
+    {% endif %}
     <p>
         Puede probar la API <strong>Delete Person Level</strong> desde el siguiente enlace:
     </p>

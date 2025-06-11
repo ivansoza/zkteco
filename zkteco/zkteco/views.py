@@ -3,8 +3,15 @@ from .zkbio_client import ZKBioClient
 
 
 def home(request):
-    """Render the home page with links to available tests."""
-    return render(request, "home.html")
+    """Render the home page and verify connection to ZKTeco."""
+    token = None
+    error = None
+    try:
+        client = ZKBioClient()
+        token = client.get_access_token()
+    except Exception as exc:
+        error = str(exc)
+    return render(request, "home.html", {"token": token, "error": error})
 
 
 def delete_person_level(request):
