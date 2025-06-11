@@ -55,7 +55,12 @@ ROOT_URLCONF = 'zkteco.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        # Look for templates in the ``templates`` directory of the project and
+        # also inside the ``zkteco`` package where the HTML files live.
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'zkteco' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
