@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from .zkbio_client import ZKBioClient
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 import base64
 from datetime import datetime
 import io
@@ -274,3 +276,25 @@ def device_detail(request):
         "device_detail.html",
         {"result": result, "error": error, "module": module, "sn": sn},
     )
+
+
+
+
+@require_POST
+def delete_person(request):
+    """Delete a person by PIN using the ZKBio API."""
+
+    pin = request.POST.get("pin")
+    if not pin:
+        return JsonResponse({"success": False, "message": "PIN requerido"}, status=400)
+
+    client = ZKBioClient()
+    try:
+        result = client.delete_person(pin)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)})
+
+    if isinstance(result, dict) and result.get("code") == 0:
+        return JsonResponse({"success": True})
+    else:
+        return JsonResponse({"success": False, "message": result})
