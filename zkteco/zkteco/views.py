@@ -60,3 +60,29 @@ def delete_person_level(request):
         "delete_person_level.html",
         {"result": result, "error": error},
     )
+
+
+def get_qr_code(request):
+    """Call the Get QR Code API and display the QR as an image."""
+    result = None
+    qr_base64 = None
+    error = None
+    if request.method == "POST":
+        pin = request.POST.get("pin", "").strip()
+        if not pin:
+            error = "pin is required"
+        else:
+            client = ZKBioClient()
+            try:
+                api_path = f"api/person/getQrCode/{pin}"
+                result = client.post(api_path, params={"pin": pin})
+                if isinstance(result, dict) and result.get("code") == 0:
+                    qr_base64 = result.get("data")
+            except Exception as exc:
+                error = str(exc)
+
+    return render(
+        request,
+        "get_qr_code.html",
+        {"result": result, "qr_base64": qr_base64, "error": error},
+    )
