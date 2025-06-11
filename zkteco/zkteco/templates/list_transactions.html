@@ -12,6 +12,7 @@
         table {
             border-collapse: collapse;
             margin-top: 20px;
+            width: 100%;
         }
         th, td {
             border: 1px solid #ccc;
@@ -22,6 +23,9 @@
             text-align: left;
         }
     </style>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
     <h1>Listado de Transacciones</h1>
@@ -50,7 +54,7 @@
     {% if result %}
         {% if result.data and result.data.data %}
             <h2>Resultados (total {{ result.data.total }})</h2>
-            <table>
+            <table id="transactionsTable">
                 <thead>
                     <tr>
                         <th>Hora</th>
@@ -85,5 +89,13 @@
     {% endif %}
 
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('transactionsTable');
+            if (table) {
+                new DataTable(table);
+            }
+        });
+    </script>
 </body>
 </html>
