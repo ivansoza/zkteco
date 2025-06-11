@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Listar Transacciones</title>
+    <meta charset="utf-8">
+    <style>
+        label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+        }
+        th {
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Listado de Transacciones</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="personPin">PIN:</label>
+        <input type="text" name="personPin" id="personPin"><br>
+        <label for="startDate">Inicio:</label>
+        <input type="text" name="startDate" id="startDate" placeholder="YYYY-MM-DD HH:MM:SS"><br>
+        <label for="endDate">Fin:</label>
+        <input type="text" name="endDate" id="endDate" placeholder="YYYY-MM-DD HH:MM:SS"><br>
+        <label for="pageNo">Página:</label>
+        <input type="number" name="pageNo" id="pageNo" value="1" min="1"><br>
+        <label for="pageSize">Tamaño:</label>
+        <input type="number" name="pageSize" id="pageSize" value="1000" min="1"><br>
+        <label for="version">Versión API:</label>
+        <select name="version" id="version">
+            <option value="v2" selected>v2</option>
+            <option value="v1">v1</option>
+        </select><br>
+        <label for="gateOnly">Sólo eventos de puerta</label>
+        <input type="checkbox" name="gateOnly" id="gateOnly"><br>
+        <button type="submit">Consultar</button>
+    </form>
+
+    {% if result %}
+        {% if result.data and result.data.data %}
+            <h2>Resultados (total {{ result.data.total }})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>PIN</th>
+                        <th>Nombre</th>
+                        <th>Evento</th>
+                        <th>Dispositivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in result.data.data %}
+                        <tr>
+                            <td>{{ txn.eventTime }}</td>
+                            <td>{{ txn.pin }}</td>
+                            <td>{{ txn.name }}</td>
+                            <td>{{ txn.eventName }}</td>
+                            <td>{{ txn.devName }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>Página {{ result.data.page }} - mostrando {{ result.data.size }} de {{ result.data.total }} registros</p>
+        {% else %}
+            <h2>Resultado</h2>
+            <pre>{{ result|safe }}</pre>
+        {% endif %}
+    {% endif %}
+
+    {% if error %}
+        <h2>Error</h2>
+        <pre>{{ error }}</pre>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+</body>
+</html>
