@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Person Level</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Delete Person Level - ZKTeco{% endblock %}
+
+{% block content %}
     <h1>Delete Person Level</h1>
     <form method="post">
         {% csrf_token %}
@@ -24,5 +23,4 @@
         <pre>{{ error }}</pre>
     {% endif %}
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
-</body>
-</html>
+{% endblock %}

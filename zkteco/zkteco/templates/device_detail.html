@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Detalle de Dispositivo</title>
-    <meta charset="utf-8">
+{% extends "base.html" %}
+
+{% block title %}Detalle de Dispositivo - ZKTeco{% endblock %}
+
+{% block extra_head %}
     <style>
         pre {
             background-color: #f6f8fa;
@@ -10,8 +10,9 @@
             border: 1px solid #ccc;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Detalle de Dispositivo</h1>
 
     {% if result %}
@@ -24,5 +25,4 @@
     {% endif %}
 
     <p><a href="{% url 'list_devices' %}">Volver al listado</a></p>
-</body>
-</html>
+{% endblock %}

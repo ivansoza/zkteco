@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Agregar Persona</title>
-    <meta charset="utf-8">
+{% extends "base.html" %}
+
+{% block title %}Agregar Persona - ZKTeco{% endblock %}
+
+{% block extra_head %}
     <style>
         label {
             display: inline-block;
@@ -19,8 +19,9 @@
             font-weight: bold;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Agregar Persona</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -100,5 +101,4 @@
     </script>
 
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
-</body>
-</html>
+{% endblock %}

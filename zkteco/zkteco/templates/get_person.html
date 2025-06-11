@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Buscar Persona</title>
-    <meta charset="utf-8">
+{% extends "base.html" %}
+
+{% block title %}Buscar Persona - ZKTeco{% endblock %}
+
+{% block extra_head %}
     <style>
         label {
             display: inline-block;
@@ -22,8 +22,9 @@
             text-align: left;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Buscar Persona</h1>
     <form method="post">
         {% csrf_token %}
@@ -55,5 +56,4 @@
         <pre>{{ error }}</pre>
     {% endif %}
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
-</body>
-</html>
+{% endblock %}
