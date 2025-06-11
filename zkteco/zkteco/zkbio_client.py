@@ -6,9 +6,10 @@ class ZKBioClient:
     """Simple client for ZKBio CVSecurity API."""
 
     def __init__(self):
-        self.base_url = settings.BASE_URL.rstrip('/')
-        self.client_id = settings.CLIENT_ID
-        self.client_secret = settings.CLIENT_SECRET
+        api_conf = getattr(settings, "ZKBIO_API", {})
+        self.base_url = api_conf.get("BASE_URL", "").rstrip("/")
+        self.client_id = api_conf.get("CLIENT_ID")
+        self.client_secret = api_conf.get("CLIENT_SECRET")
         self._access_token = None
 
     def get_access_token(self):
