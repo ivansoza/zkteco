@@ -2,7 +2,9 @@ from django.shortcuts import render
 from .zkbio_client import ZKBioClient
 import base64
 from datetime import datetime
-
+import io
+import base64
+import qrcode
 
 def home(request):
     return render(request, "home.html")
@@ -91,14 +93,18 @@ def get_qr_code(request):
         else:
             client = ZKBioClient()
             try:
-                api_path = f"api/person/getQrCode/{pin}"
-                result = client.post(api_path, data={"pin": pin})
-                if isinstance(result, dict) and result.get("code") == 0:
-                    qr_base64 = result.get("data")
-                elif isinstance(result, dict):
-                    error = result.get("message", "No se pudo obtener el código QR.")
+                # Llamas al endpoint, que te devuelve el texto a codificar
+                result = client.post(f"api/person/getQrCode/{pin}", data={"pin": pin})
+                if result.get("code") == 0:
+                    qr_data = result.get("data")  # ej. "2#Ct4PZoND9X/5g/…"
+                    
+                    # Genera el QR
+                    img = qrcode.make(qr_data)
+                    buffer = io.BytesIO()
+                    img.save(buffer, format="PNG")
+                    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
                 else:
-                    error = "No se pudo obtener el código QR."
+                    error = result.get("message", "No se pudo obtener el código QR.")
             except Exception as exc:
                 error = str(exc)
 
