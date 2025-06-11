@@ -1,20 +1,54 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Get Person</title>
+    <title>Buscar Persona</title>
+    <meta charset="utf-8">
+    <style>
+        label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+        }
+        th {
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <h1>Get Person</h1>
+    <h1>Buscar Persona</h1>
     <form method="post">
         {% csrf_token %}
         <label for="pin">Pin:</label>
         <input type="text" name="pin" id="pin" required>
-        <br>
-        <button type="submit">Get</button>
+        <button type="submit">Buscar</button>
     </form>
+
     {% if result %}
-        <h2>Result</h2>
-        <pre>{{ result|safe }}</pre>
+        {% if result.data %}
+            <h2>Resultado</h2>
+            <table>
+                <tbody>
+                {% for key, value in result.data.items %}
+                    <tr>
+                        <th>{{ key }}</th>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <h2>Resultado</h2>
+            <pre>{{ result|safe }}</pre>
+        {% endif %}
     {% endif %}
     {% if error %}
         <h2>Error</h2>
