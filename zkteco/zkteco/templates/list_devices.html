@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Listar Dispositivos</title>
-    <meta charset="utf-8">
+{% extends "base.html" %}
+
+{% block title %}Listar Dispositivos - ZKTeco{% endblock %}
+
+{% block extra_head %}
     <style>
         label {
             display: inline-block;
@@ -23,8 +23,9 @@
             text-align: left;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Listado de Dispositivos</h1>
     <form method="post">
         {% csrf_token %}
@@ -80,5 +81,4 @@
     {% endif %}
 
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
-</body>
-</html>
+{% endblock %}
