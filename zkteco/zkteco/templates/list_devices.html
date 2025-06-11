@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Listar Dispositivos</title>
+    <meta charset="utf-8">
+    <style>
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+        }
+        th {
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Listado de Dispositivos</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="module">Módulo:</label>
+        <select name="module" id="module">
+            <option value="acc" {% if module == 'acc' %}selected{% endif %}>Acceso (acc)</option>
+            <option value="psg" {% if module == 'psg' %}selected{% endif %}>Puertas (psg)</option>
+            <option value="ele" {% if module == 'ele' %}selected{% endif %}>Elevador (ele)</option>
+            <option value="ins" {% if module == 'ins' %}selected{% endif %}>FaceKiosk (ins)</option>
+        </select><br>
+        <label for="pageNo">Página:</label>
+        <input type="number" name="pageNo" id="pageNo" value="1" min="1"><br>
+        <label for="pageSize">Tamaño:</label>
+        <input type="number" name="pageSize" id="pageSize" value="100" min="1"><br>
+        <button type="submit">Consultar</button>
+    </form>
+
+    {% if result %}
+        {% if result.data and result.data.data %}
+            <h2>Resultados (total {{ result.data.total }})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SN</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dev in result.data.data %}
+                        <tr>
+                            <td>{{ dev.sn }}</td>
+                            <td>{{ dev.name }}</td>
+                            <td>{{ dev.type }}</td>
+                            <td>{{ dev.state }}</td>
+                            <td><a href="{% url 'device_detail' %}?module={{ module }}&sn={{ dev.sn }}">Detalle</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>Página {{ result.data.page }} - mostrando {{ result.data.size }} de {{ result.data.total }} registros</p>
+        {% else %}
+            <h2>Resultado</h2>
+            <pre>{{ result|safe }}</pre>
+        {% endif %}
+    {% endif %}
+
+    {% if error %}
+        <h2>Error</h2>
+        <pre>{{ error }}</pre>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+</body>
+</html>

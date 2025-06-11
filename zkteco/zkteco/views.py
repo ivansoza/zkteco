@@ -215,3 +215,62 @@ def list_transactions(request):
         "result": result,
         "error": error,
     })
+
+
+def list_devices(request):
+    """List devices for a selected module using the ZKBio API."""
+
+    result = None
+    error = None
+    module = "acc"
+
+    if request.method == "POST":
+        module = request.POST.get("module", "acc") or "acc"
+        try:
+            page_no = int(request.POST.get("pageNo", 1))
+        except (TypeError, ValueError):
+            page_no = 1
+        try:
+            page_size = int(request.POST.get("pageSize", 100))
+        except (TypeError, ValueError):
+            page_size = 100
+
+        client = ZKBioClient()
+        try:
+            result = client.get_device_list(
+                module=module,
+                page_no=page_no,
+                page_size=page_size,
+            )
+        except Exception as exc:
+            error = str(exc)
+
+    return render(
+        request,
+        "list_devices.html",
+        {"result": result, "error": error, "module": module},
+    )
+
+
+def device_detail(request):
+    """Retrieve information for a specific device by module and serial number."""
+
+    result = None
+    error = None
+    module = request.GET.get("module", "acc")
+    sn = request.GET.get("sn", "")
+
+    if sn:
+        client = ZKBioClient()
+        try:
+            result = client.get_device_info(module, sn)
+        except Exception as exc:
+            error = str(exc)
+    else:
+        error = "SN no proporcionado"
+
+    return render(
+        request,
+        "device_detail.html",
+        {"result": result, "error": error, "module": module, "sn": sn},
+    )
