@@ -1,44 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>ZKTeco Demo</title>
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 40px;
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            margin: 8px 0;
-        }
-        a.button {
-            display: inline-block;
-            padding: 8px 16px;
-            background-color: #3498db;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Zona de pruebas ZKTeco</h1>
-    <p>Seleccione una opción para interactuar con la API:</p>
-    <ul>
-        <li><a class="button" href="{% url 'add_person' %}">Agregar Persona</a></li>
-        <li><a class="button" href="{% url 'delete_person_level' %}">Eliminar Niveles de Persona</a></li>
-        <li><a class="button" href="{% url 'get_qr_code' %}">Obtener QR Dinámico</a></li>
-        <li><a class="button" href="{% url 'get_person' %}">Consultar Persona</a></li>
-        <li><a class="button" href="{% url 'list_personnel' %}">Listar Personal</a></li>
-        <li><a class="button" href="{% url 'list_transactions' %}">Listar Transacciones</a></li>
-        <li><a class="button" href="{% url 'list_devices' %}">Listar Dispositivos</a></li>
-    </ul>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Inicio - ZKTeco{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Zona de pruebas ZKTeco</h1>
+<p class="mb-4">Seleccione una opción para interactuar con la API:</p>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">Gestión de Personas</div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action" href="{% url 'add_person' %}">Agregar Persona</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'delete_person_level' %}">Eliminar Niveles de Persona</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'get_qr_code' %}">Obtener QR Dinámico</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'get_person' %}">Consultar Persona</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'list_personnel' %}">Listar Personal</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">Dispositivos y Transacciones</div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action" href="{% url 'list_devices' %}">Listar Dispositivos</a>
+                <a class="list-group-item list-group-item-action" href="{% url 'list_transactions' %}">Listar Transacciones</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
