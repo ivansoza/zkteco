@@ -148,40 +148,58 @@ def get_person(request):
 
 
 def list_personnel(request):
-    """Retrieve a paginated list of personnel from the ZKBio API."""
-    result = None
-    error = None
+    """Render the personnel list page."""
 
-    if request.method == "POST":
-        pins = request.POST.get("pins", "")
-        dept_codes = request.POST.get("deptCodes", "")
-        try:
-            page_no = int(request.POST.get("pageNo", 1))
-        except (TypeError, ValueError):
-            page_no = 1
-        try:
-            page_size = int(request.POST.get("pageSize", 100))
-        except (TypeError, ValueError):
-            page_size = 100
+    return render(request, "list_personnel.html")
 
-        client = ZKBioClient()
-        try:
-            result = client.get_person_list(
-                pins=pins,
-                dept_codes=dept_codes,
-                page_no=page_no,
-                page_size=page_size,
-            )
-        except Exception as exc:
-            error = str(exc)
 
-    return render(request, "list_personnel.html", {
-        "result": result,
-        "error": error,
-        # Ya no necesitamos la URL/token en JS, pero dejamos por si los usas en otro lado
-        "zkbio_base_url": settings.ZKBIO_API["BASE_URL"].rstrip("/"),
-        "zkbio_access_token": settings.ZKBIO_API["ACCESS_TOKEN"],
-    })
+@require_http_methods(["GET"])
+def list_personnel_data(request):
+    """Return personnel data in the format expected by DataTables."""
+
+    try:
+        draw = int(request.GET.get("draw", 1))
+    except (TypeError, ValueError):
+        draw = 1
+
+    try:
+        start = int(request.GET.get("start", 0))
+    except (TypeError, ValueError):
+        start = 0
+
+    try:
+        length = int(request.GET.get("length", 10))
+    except (TypeError, ValueError):
+        length = 10
+
+    pins = request.GET.get("pins", "")
+    dept_codes = request.GET.get("deptCodes", "")
+
+    page_no = start // length + 1
+    page_size = length
+
+    client = ZKBioClient()
+    try:
+        payload = client.get_person_list(
+            pins=pins,
+            dept_codes=dept_codes,
+            page_no=page_no,
+            page_size=page_size,
+        )
+        data = payload.get("data", {}) if isinstance(payload, dict) else {}
+        records = data.get("data", [])
+        total = data.get("total", 0)
+
+        return JsonResponse(
+            {
+                "draw": draw,
+                "recordsTotal": total,
+                "recordsFiltered": total,
+                "data": records,
+            }
+        )
+    except Exception as exc:
+        return JsonResponse({"error": str(exc)}, status=500)
 
 def list_transactions(request):
     """Retrieve access transactions using the ZKBio API."""
