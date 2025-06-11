@@ -140,3 +140,37 @@ def get_person(request):
         "result": result,
         "error": error,
     })
+
+
+def list_personnel(request):
+    """Retrieve a paginated list of personnel from the ZKBio API."""
+    result = None
+    error = None
+
+    if request.method == "POST":
+        pins = request.POST.get("pins", "")
+        dept_codes = request.POST.get("deptCodes", "")
+        try:
+            page_no = int(request.POST.get("pageNo", 1))
+        except (TypeError, ValueError):
+            page_no = 1
+        try:
+            page_size = int(request.POST.get("pageSize", 100))
+        except (TypeError, ValueError):
+            page_size = 100
+
+        client = ZKBioClient()
+        try:
+            result = client.get_person_list(
+                pins=pins,
+                dept_codes=dept_codes,
+                page_no=page_no,
+                page_size=page_size,
+            )
+        except Exception as exc:
+            error = str(exc)
+
+    return render(request, "list_personnel.html", {
+        "result": result,
+        "error": error,
+    })
