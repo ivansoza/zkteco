@@ -92,9 +92,11 @@ def get_qr_code(request):
             client = ZKBioClient()
             try:
                 api_path = f"api/person/getQrCode/{pin}"
-                result = client.post(api_path, params={"pin": pin})
+                result = client.post(api_path, data={"pin": pin})
                 if isinstance(result, dict) and result.get("code") == 0:
                     qr_base64 = result.get("data")
+                elif isinstance(result, dict):
+                    error = result.get("message", "No se pudo obtener el código QR.")
                 else:
                     error = "No se pudo obtener el código QR."
             except Exception as exc:
@@ -118,7 +120,13 @@ def get_person(request):
         else:
             client = ZKBioClient()
             try:
-                result = client.get(f"api/person/get/{pin}")
+                response = client.get(f"api/person/get/{pin}")
+                if isinstance(response, dict) and response.get("code") == 0:
+                    result = response
+                elif isinstance(response, dict):
+                    error = response.get("message", "No se pudo obtener la información")
+                else:
+                    result = response
             except Exception as exc:
                 error = str(exc)
 
