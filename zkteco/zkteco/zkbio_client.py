@@ -20,6 +20,21 @@ class ZKBioClient:
         except Exception as exc:
             raise RuntimeError(f"API call failed: {exc}")
 
+    def get(self, path, params=None):
+        """GET request using token in query params."""
+        if params is None:
+            params = {}
+        params["access_token"] = self.access_token
+
+        url = urljoin(self.base_url + '/', path.lstrip('/'))
+
+        try:
+            response = requests.get(url, params=params, verify=False)
+            response.raise_for_status()
+            return response.json()
+        except Exception as exc:
+            raise RuntimeError(f"API call failed: {exc}")
+
 # Example usage:
 # from zkteco.zkbio_client import ZKBioClient
 # client = ZKBioClient()
