@@ -107,25 +107,19 @@ class ZKBioClient:
 
         return self.get(path, params={"sn": sn})
 
-    def delete_person(self, pin):
-        """Delete a person by PIN using the POST delete endpoint."""
 
-        url = urljoin(self.base_url + '/', 'api/person/delete')
+
+    def delete_person(self, pin: int):
+        """
+        Variante confirmada por Postman:
+        POST /api/person/delete/{pin}?access_token=TOKEN
+        """
+        base = settings.ZKBIO_API["BASE_URL"].rstrip("/")
+        url  = urljoin(base + "/", f"api/person/delete/{pin}")   # pin en la ruta
         params = {
-            'access_token': self.access_token,
-            'pin': pin,
+            "access_token": settings.ZKBIO_API["ACCESS_TOKEN"]   # ¡solo token!
         }
 
-        try:
-            response = requests.post(url, params=params, verify=False)
-            response.raise_for_status()
-            return response.json()
-        except Exception as exc:
-            raise RuntimeError(f"API DELETE person failed: {exc}")
-
-# Example usage:
-# from zkteco.zkbio_client import ZKBioClient
-# client = ZKBioClient()
-# token = client.get_access_token()  # Optional: token retrieved lazily otherwise
-# response = client.get('/api/some/endpoint')
-# print(response.json())
+        resp = requests.post(url, params=params, verify=False, timeout=10)
+        resp.raise_for_status()         # lanzará si HTTP != 2xx
+        return resp.json() 

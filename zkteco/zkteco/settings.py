@@ -131,7 +131,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ZKBIO_API = {
     'BASE_URL': 'https://192.168.1.100:8098',  # IP y puerto del servidor ZKBio
-    'ACCESS_TOKEN': 'AD64D2D33C9409B8F91B8B886722F1C5'  # Tu token fijo (Client Secret)
+    'ACCESS_TOKEN': '2535B948F6554994C7A69487422AF044'  # Tu token fijo (Client Secret)
 }
 # Tamaño máximo del body de una petición (en bytes)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5 MB

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Listar Personal - ZKTeco{% endblock %}
+
+{% block extra_head %}
+    <style>
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+        }
+        th {
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>Listado de Personal</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="pins">PINs:</label>
+        <input type="text" name="pins" id="pins" placeholder="Ej: 1,2,3"><br>
+        <label for="deptCodes">Departamentos:</label>
+        <input type="text" name="deptCodes" id="deptCodes" placeholder="Ej: 1,2"><br>
+        <label for="pageNo">Página:</label>
+        <input type="number" name="pageNo" id="pageNo" value="1" min="1"><br>
+        <label for="pageSize">Tamaño:</label>
+        <input type="number" name="pageSize" id="pageSize" value="100" min="1"><br>
+        <button type="submit">Consultar</button>
+    </form>
+
+    {% if result %}
+        {% if result.data and result.data.data %}
+            <h2>Resultados (total {{ result.data.total }})</h2>
+            <table id="personTable">
+                <thead>
+                    <tr>
+                        <th>PIN</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Depto</th>
+                        <th>Código Depto</th>
+                        <th>Género</th>
+                        <th>Tarjeta</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Placa</th>
+                        <th>Deshabilitado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in result.data.data %}
+                        <tr>
+                            <td>{{ person.pin }}</td>
+                            <td>{{ person.name }}</td>
+                            <td>{{ person.lastName }}</td>
+                            <td>{{ person.deptName }}</td>
+                            <td>{{ person.deptCode }}</td>
+                            <td>{{ person.gender }}</td>
+                            <td>{{ person.cardNo }}</td>
+                            <td>{{ person.mobilePhone }}</td>
+                            <td>{{ person.email }}</td>
+                            <td>{{ person.carPlate }}</td>
+                            <td>{{ person.isDisabled }}</td>
+                            <td>
+                                <form method="post" action="{% url 'delete_person' %}" class="delete-form d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="pin" value="{{ person.pin }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>Página {{ result.data.page }} - mostrando {{ result.data.size }} de {{ result.data.total }} registros</p>
+        {% else %}
+            <h2>Resultado</h2>
+            <pre>{{ result|safe }}</pre>
+        {% endif %}
+    {% endif %}
+
+    {% if error %}
+        <h2>Error</h2>
+        <pre>{{ error }}</pre>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('personTable');
+            if (table) {
+                new DataTable(table);
+            }
+
+            document.querySelectorAll('.delete-form').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const f = this;
+                    Swal.fire({
+                        title: '¿Eliminar usuario?',
+                        text: '¿Estás seguro que deseas eliminar este usuario?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(f.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': f.querySelector('[name=csrfmiddlewaretoken]').value
+                                },
+                                body: new FormData(f)
+                            })
+                            .then(resp => resp.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire('Eliminado', 'Usuario eliminado correctamente', 'success');
+                                    f.closest('tr').remove();
+                                } else {
+                                    Swal.fire('Error', data.message || 'No se pudo eliminar', 'error');
+                                }
+                            })
+                            .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}

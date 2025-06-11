@@ -30,7 +30,9 @@
 
 {% block content %}
     <h1>Listado de Personal</h1>
-    <form method="post">
+
+    {# Formulario de consulta #}
+    <form method="post" class="mb-4">
         {% csrf_token %}
         <label for="pins">PINs:</label>
         <input type="text" name="pins" id="pins" placeholder="Ej: 1,2,3"><br>
@@ -40,59 +42,60 @@
         <input type="number" name="pageNo" id="pageNo" value="1" min="1"><br>
         <label for="pageSize">Tamaño:</label>
         <input type="number" name="pageSize" id="pageSize" value="100" min="1"><br>
-        <button type="submit">Consultar</button>
+        <button type="submit" class="btn btn-primary">Consultar</button>
     </form>
 
-    {% if result %}
-        {% if result.data and result.data.data %}
-            <h2>Resultados (total {{ result.data.total }})</h2>
-            <table id="personTable">
-                <thead>
-                    <tr>
-                        <th>PIN</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
-                        <th>Depto</th>
-                        <th>Código Depto</th>
-                        <th>Género</th>
-                        <th>Tarjeta</th>
-                        <th>Teléfono</th>
-                        <th>Email</th>
-                        <th>Placa</th>
-                        <th>Deshabilitado</th>
-                        <th>Acciones</th>
+    {% if result and result.data and result.data.data %}
+        <h2>Resultados (total {{ result.data.total }})</h2>
+        <table id="personTable">
+            <thead>
+                <tr>
+                    <th>PIN</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Depto</th>
+                    <th>Código Depto</th>
+                    <th>Género</th>
+                    <th>Tarjeta</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Placa</th>
+                    <th>Deshabilitado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for person in result.data.data %}
+                    <tr data-pin="{{ person.pin }}">
+                        <td>{{ person.pin }}</td>
+                        <td>{{ person.name }}</td>
+                        <td>{{ person.lastName }}</td>
+                        <td>{{ person.deptName }}</td>
+                        <td>{{ person.deptCode }}</td>
+                        <td>{{ person.gender }}</td>
+                        <td>{{ person.cardNo }}</td>
+                        <td>{{ person.mobilePhone }}</td>
+                        <td>{{ person.email }}</td>
+                        <td>{{ person.carPlate }}</td>
+                        <td>{{ person.isDisabled }}</td>
+                        <td>
+                            <button
+                                class="btn btn-sm btn-danger btn-delete"
+                                data-pin="{{ person.pin }}"
+                            >
+                                Eliminar
+                            </button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% for person in result.data.data %}
-                        <tr>
-                            <td>{{ person.pin }}</td>
-                            <td>{{ person.name }}</td>
-                            <td>{{ person.lastName }}</td>
-                            <td>{{ person.deptName }}</td>
-                            <td>{{ person.deptCode }}</td>
-                            <td>{{ person.gender }}</td>
-                            <td>{{ person.cardNo }}</td>
-                            <td>{{ person.mobilePhone }}</td>
-                            <td>{{ person.email }}</td>
-                            <td>{{ person.carPlate }}</td>
-                            <td>{{ person.isDisabled }}</td>
-                            <td>
-                                <form method="post" action="{% url 'delete_person' %}" class="delete-form d-inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="pin" value="{{ person.pin }}">
-                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <p>Página {{ result.data.page }} - mostrando {{ result.data.size }} de {{ result.data.total }} registros</p>
-        {% else %}
-            <h2>Resultado</h2>
-            <pre>{{ result|safe }}</pre>
-        {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="mt-3">
+            Página {{ result.data.page }} – mostrando {{ result.data.size }} de {{ result.data.total }} registros
+        </p>
+    {% elif result %}
+        <h2>Resultado</h2>
+        <pre>{{ result|safe }}</pre>
     {% endif %}
 
     {% if error %}
@@ -100,50 +103,53 @@
         <pre>{{ error }}</pre>
     {% endif %}
 
-    <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+    <p class="mt-4"><a href="{% url 'home' %}">Volver al inicio</a></p>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('personTable')) {
+        new DataTable('#personTable');
+    }
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const table = document.getElementById('personTable');
-            if (table) {
-                new DataTable(table);
-            }
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            document.querySelectorAll('.delete-form').forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    const f = this;
-                    Swal.fire({
-                        title: '¿Eliminar usuario?',
-                        text: '¿Estás seguro que deseas eliminar este usuario?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch(f.action, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRFToken': f.querySelector('[name=csrfmiddlewaretoken]').value
-                                },
-                                body: new FormData(f)
-                            })
-                            .then(resp => resp.json())
-                            .then(data => {
-                                if (data.success) {
-                                    Swal.fire('Eliminado', 'Usuario eliminado correctamente', 'success');
-                                    f.closest('tr').remove();
-                                } else {
-                                    Swal.fire('Error', data.message || 'No se pudo eliminar', 'error');
-                                }
-                            })
-                            .catch(() => Swal.fire('Error', 'No se pudo eliminar', 'error'));
-                        }
-                    });
-                });
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pin = btn.dataset.pin;
+
+            Swal.fire({
+                title: '¿Eliminar usuario?',
+                text: `PIN ${pin}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then(({ isConfirmed }) => {
+                if (!isConfirmed) return;
+
+                // 1) Llamada al endpoint interno de Django (misma origin)
+                fetch("{% url 'delete_person' 0 %}".replace("/0/", `/${pin}/`), {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Eliminado', 'Usuario eliminado correctamente', 'success');
+                        btn.closest('tr').remove();
+                    } else {
+                        Swal.fire('Error', data.message || 'No se pudo eliminar', 'error');
+                    }
+                })
+                .catch(() => Swal.fire('Error', 'No se pudo conectar al servidor', 'error'));
             });
         });
-    </script>
+    });
+});
+</script>
+
 {% endblock %}

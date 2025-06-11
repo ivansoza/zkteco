@@ -13,6 +13,11 @@ urlpatterns = [
     path("list_transactions/", views.list_transactions, name="list_transactions"),
     path("list_devices/", views.list_devices, name="list_devices"),
     path("device_detail/", views.device_detail, name="device_detail"),
-    path("delete_person/", views.delete_person, name="delete_person"),
+    # urls.py
+    path(
+        "person/delete/<int:pin>/",
+        views.delete_person,
+        name="delete_person"
+    ),
     path("admin/", admin.site.urls),
 ]

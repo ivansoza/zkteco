@@ -7,6 +7,8 @@ from datetime import datetime
 import io
 import base64
 import qrcode
+from django.views.decorators.http import require_http_methods
+from django.conf import settings
 
 def home(request):
     return render(request, "home.html")
@@ -144,6 +146,7 @@ def get_person(request):
     })
 
 
+
 def list_personnel(request):
     """Retrieve a paginated list of personnel from the ZKBio API."""
     result = None
@@ -175,8 +178,10 @@ def list_personnel(request):
     return render(request, "list_personnel.html", {
         "result": result,
         "error": error,
+        # Ya no necesitamos la URL/token en JS, pero dejamos por si los usas en otro lado
+        "zkbio_base_url": settings.ZKBIO_API["BASE_URL"].rstrip("/"),
+        "zkbio_access_token": settings.ZKBIO_API["ACCESS_TOKEN"],
     })
-
 
 def list_transactions(request):
     """Retrieve access transactions using the ZKBio API."""
@@ -278,23 +283,17 @@ def device_detail(request):
     )
 
 
+@require_http_methods(["DELETE"])              # el front-end sigue enviando DELETE
+def delete_person(request, pin):
+    payload = ZKBioClient().delete_person(pin) # ← hará POST al panel
 
-
-@require_POST
-def delete_person(request):
-    """Delete a person by PIN using the ZKBio API."""
-
-    pin = request.POST.get("pin")
-    if not pin:
-        return JsonResponse({"success": False, "message": "PIN requerido"}, status=400)
-
-    client = ZKBioClient()
-    try:
-        result = client.delete_person(pin)
-    except Exception as exc:
-        return JsonResponse({"success": False, "message": str(exc)})
-
-    if isinstance(result, dict) and result.get("code") == 0:
+    if isinstance(payload, dict) and payload.get("code") == 0:
         return JsonResponse({"success": True})
-    else:
-        return JsonResponse({"success": False, "message": result})
+
+    return JsonResponse(
+        {
+            "success": False,
+            "message": payload.get("message", "No se pudo eliminar")
+        },
+        status=400
+    )
