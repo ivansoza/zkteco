@@ -130,7 +130,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 
 ZKBIO_API = {
-    'BASE_URL': 'http://192.168.1.100:8088',  # IP y puerto del servidor ZKBio
-    'CLIENT_ID': '2',                         # ID de cliente proporcionado
-    'CLIENT_SECRET': 'AD64D2D33C9409B8F91B8B886722F1C5	'  # API Key o Client Secret
+    'BASE_URL': 'https://192.168.1.100:8098',  # IP y puerto del servidor ZKBio
+    'ACCESS_TOKEN': 'AD64D2D33C9409B8F91B8B886722F1C5'  # Tu token fijo (Client Secret)
 }

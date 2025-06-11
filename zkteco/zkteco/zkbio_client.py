@@ -1,54 +1,28 @@
 import requests
 from urllib.parse import urljoin
 from django.conf import settings
-
 class ZKBioClient:
-    """Simple client for ZKBio CVSecurity API."""
+    """ZKBio client using static token in URL parameters."""
 
     def __init__(self):
         api_conf = getattr(settings, "ZKBIO_API", {})
         self.base_url = api_conf.get("BASE_URL", "").rstrip("/")
-        self.client_id = api_conf.get("CLIENT_ID")
-        self.client_secret = api_conf.get("CLIENT_SECRET")
-        self._access_token = None
+        self.access_token = api_conf.get("ACCESS_TOKEN")
 
-    def get_access_token(self):
-        """Retrieve and cache an access token."""
-        url = urljoin(self.base_url + '/', 'api/auth/token')
-        payload = {
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-        }
+    def post(self, path, params=None):
+        """POST request using token in query params."""
+        if params is None:
+            params = {}
+        params["access_token"] = self.access_token
+
+        url = urljoin(self.base_url + '/', path.lstrip('/'))
+
         try:
-            response = requests.post(url, json=payload, timeout=10)
+            response = requests.post(url, params=params, verify=False)
             response.raise_for_status()
-            self._access_token = response.json().get('access_token')
-        except requests.RequestException as exc:
-            raise RuntimeError('Unable to obtain access token') from exc
-        return self._access_token
-
-    def _get_headers(self, headers=None):
-        headers = headers.copy() if headers else {}
-        if not self._access_token:
-            self.get_access_token()
-        headers.setdefault('Authorization', f'Bearer {self._access_token}')
-        return headers
-
-    def get(self, path, **kwargs):
-        """Send a GET request with authorization."""
-        url = urljoin(self.base_url + '/', path.lstrip('/'))
-        headers = self._get_headers(kwargs.pop('headers', None))
-        response = requests.get(url, headers=headers, **kwargs)
-        response.raise_for_status()
-        return response
-
-    def post(self, path, data=None, json=None, **kwargs):
-        """Send a POST request with authorization."""
-        url = urljoin(self.base_url + '/', path.lstrip('/'))
-        headers = self._get_headers(kwargs.pop('headers', None))
-        response = requests.post(url, headers=headers, data=data, json=json, **kwargs)
-        response.raise_for_status()
-        return response
+            return response.json()
+        except Exception as exc:
+            raise RuntimeError(f"API call failed: {exc}")
 
 # Example usage:
 # from zkteco.zkbio_client import ZKBioClient
