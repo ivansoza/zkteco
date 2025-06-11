@@ -26,6 +26,7 @@
 <table id="personTable" class="display" style="width:100%">
     <thead>
         <tr>
+            <th>Foto</th>
             <th>PIN</th>
             <th>Nombre</th>
             <th>Apellido</th>
@@ -59,6 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         columns: [
+            {
+                data: 'personPhoto',
+                orderable: false,
+                render: data => {
+                    const src = data ? `data:image/jpeg;base64,${data}` : 'https://via.placeholder.com/40';
+                    return `<img src="${src}" class="rounded" style="width:40px;height:40px;object-fit:cover">`;
+                }
+            },
             { data: 'pin' },
             { data: 'name' },
             { data: 'lastName' },
@@ -70,8 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
             { data: 'email' },
             { data: 'carPlate' },
             { data: 'isDisabled' },
-            { data: null, orderable: false, render: (data, type, row) => 
-                `<button class="btn btn-sm btn-danger btn-delete" data-pin="${row.pin}">Eliminar</button>` }
+            { data: null, orderable: false, render: (data, type, row) =>
+                `<button class="btn btn-sm btn-primary btn-change-photo" data-pin="${row.pin}">Cambiar foto</button>
+                 <button class="btn btn-sm btn-danger btn-delete" data-pin="${row.pin}">Eliminar</button>` }
         ]
     });
 
@@ -110,6 +120,43 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(() => Swal.fire('Error', 'No se pudo conectar al servidor', 'error'));
         });
+    });
+
+    $('#personTable').on('click', '.btn-change-photo', function() {
+        const pin = this.dataset.pin;
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = () => {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1];
+                fetch('{% url "update_person_photo" 0 %}'.replace('/0/', `/${pin}/`), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({personPhoto: base64}),
+                    credentials: 'same-origin'
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Actualizado', 'Foto actualizada', 'success');
+                        table.ajax.reload(null, false);
+                    } else {
+                        Swal.fire('Error', data.message || 'No se pudo actualizar', 'error');
+                    }
+                })
+                .catch(() => Swal.fire('Error', 'No se pudo conectar al servidor', 'error'));
+            };
+            reader.readAsDataURL(file);
+        };
+        input.click();
     });
 });
 </script>
