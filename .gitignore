@@ -1,9 +1,96 @@
-db.sqlite3
+#Produccion 
+settings_prod.py
+
+# Virtualenv
+.venv
+venv
+ENV
+env
+.env
+.env/
+env.bak
+venv.bak
+entv
+
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
 *.pyc
 *.pyo
 *.pyd
+*.db
 *.sqlite3
-env/
-venv/
-*.egg-info/
+
+# If using sqlite3:
+db.sqlite3
+db.sqlite3-journal
+
+# Django migrations
+**/migrations/*
+!**/migrations/__init__.py
+# Media
+media
+
+# Static files
+/staticfiles
+/static
+static_collected
+
+# Local environment settings
+.env
+
+# VS Code settings
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Node modules
+node_modules/
+
+# Python Egg files
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+var
+wheels
+share/python-wheels
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Test logs
+.coverage
+.tox
+.nox
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
