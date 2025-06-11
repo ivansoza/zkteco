@@ -34,6 +34,16 @@ class ZKBioClient:
         except Exception as exc:
             raise RuntimeError(f"API GET call failed: {exc}")
 
+    def get_person_list(self, pins="", dept_codes="", page_no=1, page_size=100):
+        """Return paginated personnel list using the getPersonList endpoint."""
+        data = {
+            "pins": pins,
+            "deptCodes": dept_codes,
+            "pageNo": page_no,
+            "pageSize": page_size,
+        }
+        return self.post("api/v2/person/getPersonList", data=data)
+
 # Example usage:
 # from zkteco.zkbio_client import ZKBioClient
 # client = ZKBioClient()

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Listar Personal</title>
+    <meta charset="utf-8">
+    <style>
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px 10px;
+        }
+        th {
+            background-color: #f0f0f0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Listado de Personal</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="pins">PINs:</label>
+        <input type="text" name="pins" id="pins" placeholder="Ej: 1,2,3"><br>
+        <label for="deptCodes">Departamentos:</label>
+        <input type="text" name="deptCodes" id="deptCodes" placeholder="Ej: 1,2"><br>
+        <label for="pageNo">Página:</label>
+        <input type="number" name="pageNo" id="pageNo" value="1" min="1"><br>
+        <label for="pageSize">Tamaño:</label>
+        <input type="number" name="pageSize" id="pageSize" value="100" min="1"><br>
+        <button type="submit">Consultar</button>
+    </form>
+
+    {% if result %}
+        {% if result.data and result.data.data %}
+            <h2>Resultados (total {{ result.data.total }})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>PIN</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Depto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in result.data.data %}
+                        <tr>
+                            <td>{{ person.pin }}</td>
+                            <td>{{ person.name }}</td>
+                            <td>{{ person.lastName }}</td>
+                            <td>{{ person.deptName }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p>Página {{ result.data.page }} - mostrando {{ result.data.size }} de {{ result.data.total }} registros</p>
+        {% else %}
+            <h2>Resultado</h2>
+            <pre>{{ result|safe }}</pre>
+        {% endif %}
+    {% endif %}
+
+    {% if error %}
+        <h2>Error</h2>
+        <pre>{{ error }}</pre>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+</body>
+</html>
