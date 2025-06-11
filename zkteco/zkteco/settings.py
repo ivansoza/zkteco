@@ -127,7 +127,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Settings for ZKBio CVSecurity API
-BASE_URL = os.getenv('ZKBIO_BASE_URL', '')
-CLIENT_ID = os.getenv('ZKBIO_CLIENT_ID', '')
-CLIENT_SECRET = os.getenv('ZKBIO_CLIENT_SECRET', '')
+# settings.py
+
+ZKBIO_API = {
+    'BASE_URL': 'http://192.168.1.100:8088',  # IP y puerto del servidor ZKBio
+    'CLIENT_ID': '2',                         # ID de cliente proporcionado
+    'CLIENT_SECRET': 'AD64D2D33C9409B8F91B8B886722F1C5	'  # API Key o Client Secret
+}
