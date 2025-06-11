@@ -11,5 +11,7 @@ urlpatterns = [
     path("get_person/", views.get_person, name="get_person"),
     path("list_personnel/", views.list_personnel, name="list_personnel"),
     path("list_transactions/", views.list_transactions, name="list_transactions"),
+    path("list_devices/", views.list_devices, name="list_devices"),
+    path("device_detail/", views.device_detail, name="device_detail"),
     path("admin/", admin.site.urls),
 ]

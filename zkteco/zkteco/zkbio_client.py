@@ -74,6 +74,39 @@ class ZKBioClient:
 
         return self.get(path, params=params)
 
+    # ------------------------------------------------------------------
+    # Device management helpers
+    # ------------------------------------------------------------------
+
+    def get_device_list(self, module="acc", page_no=1, page_size=100, v2=True):
+        """Return a paginated list of devices for the given ``module``."""
+
+        if module == "acc":
+            path = f"api/{'v2/' if v2 else ''}device/{'list' if v2 else 'accList'}"
+        elif module == "psg":
+            path = f"api/{'v2/' if v2 else ''}psgDevice/list"
+        elif module == "ele":
+            path = "api/eleDevice/eleList"
+        elif module == "ins":
+            path = "api/device/attAdDeviceList"
+        else:
+            raise ValueError(f"Unknown module: {module}")
+
+        params = {"pageNo": page_no, "pageSize": page_size}
+        return self.get(path, params=params)
+
+    def get_device_info(self, module, sn):
+        """Return device information by serial number for a module."""
+
+        if module == "acc":
+            path = "api/device/getAcc"
+        elif module == "psg":
+            path = "api/psgDevice/getBySn"
+        else:
+            raise ValueError(f"Info endpoint not defined for module: {module}")
+
+        return self.get(path, params={"sn": sn})
+
 # Example usage:
 # from zkteco.zkbio_client import ZKBioClient
 # client = ZKBioClient()
