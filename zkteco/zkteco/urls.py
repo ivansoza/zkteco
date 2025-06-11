@@ -24,5 +24,10 @@ urlpatterns = [
         views.delete_person,
         name="delete_person"
     ),
+    path(
+        "person/update-photo/<int:pin>/",
+        views.update_person_photo,
+        name="update_person_photo",
+    ),
     path("admin/", admin.site.urls),
 ]

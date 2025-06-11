@@ -122,4 +122,9 @@ class ZKBioClient:
 
         resp = requests.post(url, params=params, verify=False, timeout=10)
         resp.raise_for_status()         # lanzará si HTTP != 2xx
-        return resp.json() 
+        return resp.json()
+
+    def update_person_photo(self, pin: int, person_photo: str):
+        """Update a person's photo using a Base64 encoded image."""
+        data = {"pin": pin, "personPhoto": person_photo}
+        return self.post("api/person/updatePersonnelPhoto", data=data)

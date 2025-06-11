@@ -315,3 +315,28 @@ def delete_person(request, pin):
         },
         status=400
     )
+
+
+@require_http_methods(["POST"])
+def update_person_photo(request, pin):
+    """Update a person's photo using the ZKBio API."""
+    photo = request.POST.get("personPhoto", "")
+    if not photo:
+        return JsonResponse({"success": False, "message": "Foto no proporcionada"}, status=400)
+
+    client = ZKBioClient()
+    try:
+        payload = client.update_person_photo(pin, photo)
+    except Exception as exc:
+        return JsonResponse({"success": False, "message": str(exc)}, status=500)
+
+    if isinstance(payload, dict) and payload.get("code") == 0:
+        return JsonResponse({"success": True})
+
+    return JsonResponse(
+        {
+            "success": False,
+            "message": payload.get("message", "No se pudo actualizar la foto"),
+        },
+        status=400,
+    )
