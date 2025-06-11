@@ -10,5 +10,6 @@ urlpatterns = [
     path("get_qr_code/", views.get_qr_code, name="get_qr_code"),
     path("get_person/", views.get_person, name="get_person"),
     path("list_personnel/", views.list_personnel, name="list_personnel"),
+    path("list_transactions/", views.list_transactions, name="list_transactions"),
     path("admin/", admin.site.urls),
 ]

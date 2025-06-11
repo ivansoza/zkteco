@@ -44,6 +44,36 @@ class ZKBioClient:
         }
         return self.post("api/v2/person/getPersonList", data=data)
 
+    def get_transactions(
+        self,
+        person_pin="",
+        start_date="",
+        end_date="",
+        page_no=1,
+        page_size=1000,
+        gate_only=False,
+        v2=True,
+    ):
+        """Return paginated access transactions.
+
+        Parameters mirror the API query parameters. If ``gate_only`` is
+        ``True`` the gate transaction endpoint is used. ``v2`` selects the
+        version of the endpoint.
+        """
+
+        base = "psgTransaction/list" if gate_only else "transaction/list"
+        path = f"api/{'v2/' if v2 else ''}{base}"
+
+        params = {
+            "personPin": person_pin,
+            "startDate": start_date,
+            "endDate": end_date,
+            "pageNo": page_no,
+            "pageSize": page_size,
+        }
+
+        return self.get(path, params=params)
+
 # Example usage:
 # from zkteco.zkbio_client import ZKBioClient
 # client = ZKBioClient()

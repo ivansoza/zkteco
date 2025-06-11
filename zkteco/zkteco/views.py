@@ -174,3 +174,44 @@ def list_personnel(request):
         "result": result,
         "error": error,
     })
+
+
+def list_transactions(request):
+    """Retrieve access transactions using the ZKBio API."""
+    result = None
+    error = None
+
+    if request.method == "POST":
+        person_pin = request.POST.get("personPin", "")
+        start_date = request.POST.get("startDate", "")
+        end_date = request.POST.get("endDate", "")
+        try:
+            page_no = int(request.POST.get("pageNo", 1))
+        except (TypeError, ValueError):
+            page_no = 1
+        try:
+            page_size = int(request.POST.get("pageSize", 1000))
+        except (TypeError, ValueError):
+            page_size = 1000
+
+        gate_only = request.POST.get("gateOnly") == "on"
+        v2 = request.POST.get("version", "v2") == "v2"
+
+        client = ZKBioClient()
+        try:
+            result = client.get_transactions(
+                person_pin=person_pin,
+                start_date=start_date,
+                end_date=end_date,
+                page_no=page_no,
+                page_size=page_size,
+                gate_only=gate_only,
+                v2=v2,
+            )
+        except Exception as exc:
+            error = str(exc)
+
+    return render(request, "list_transactions.html", {
+        "result": result,
+        "error": error,
+    })
