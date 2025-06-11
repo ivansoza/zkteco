@@ -1,56 +1,103 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Person</title>
+    <title>Agregar Persona</title>
+    <meta charset="utf-8">
+    <style>
+        label {
+            display: inline-block;
+            width: 180px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 300px;
+        }
+        button {
+            padding: 8px 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>Add Person</h1>
-    <form method="post">
+    <h1>Agregar Persona</h1>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <label for="pin">Pin:</label>
         <input type="text" name="pin" id="pin" required><br>
 
-        <label for="deptCode">Dept Code:</label>
+        <label for="deptCode">Código de Departamento:</label>
         <input type="text" name="deptCode" id="deptCode" required><br>
 
-        <label for="name">Name:</label>
+        <label for="name">Nombre:</label>
         <input type="text" name="name" id="name" required><br>
 
-        <label for="lastName">Last Name:</label>
+        <label for="lastName">Apellido:</label>
         <input type="text" name="lastName" id="lastName"><br>
 
-        <label for="gender">Gender:</label>
+        <label for="gender">Género:</label>
         <select name="gender" id="gender">
-            <option value="M">M</option>
-            <option value="F">F</option>
+            <option value="">-- Seleccionar --</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
         </select><br>
 
-        <label for="cardNo">Card No:</label>
+        <label for="cardNo">Número de Tarjeta:</label>
         <input type="text" name="cardNo" id="cardNo"><br>
 
-        <label for="personPhoto">Person Photo (base64):</label>
-        <input type="text" name="personPhoto" id="personPhoto"><br>
+        <label for="personPhotoFile">Foto (JPG/PNG):</label>
+        <input type="file" id="personPhotoFile" accept="image/*"><br>
 
-        <label for="accLevelIds">Access Level IDs:</label>
+        <input type="hidden" name="personPhoto" id="personPhoto">
+
+        <label for="accLevelIds">ID de Niveles de Acceso:</label>
         <input type="text" name="accLevelIds" id="accLevelIds"><br>
 
-        <label for="accStartTime">Access Start Time:</label>
-        <input type="text" name="accStartTime" id="accStartTime"><br>
+        <label for="accStartTime">Inicio de Acceso:</label>
+        <input type="datetime-local" id="accStartTimeLocal"><br>
+        <input type="hidden" name="accStartTime" id="accStartTime">
 
-        <label for="accEndTime">Access End Time:</label>
-        <input type="text" name="accEndTime" id="accEndTime"><br>
+        <label for="accEndTime">Fin de Acceso:</label>
+        <input type="datetime-local" id="accEndTimeLocal"><br>
+        <input type="hidden" name="accEndTime" id="accEndTime">
 
-        <button type="submit">Add</button>
+        <button type="submit" onclick="prepareSubmission()">Agregar</button>
     </form>
 
     {% if result %}
-        <h2>Result</h2>
+        <h2>Resultado</h2>
         <pre>{{ result|safe }}</pre>
     {% endif %}
     {% if error %}
         <h2>Error</h2>
         <pre>{{ error }}</pre>
     {% endif %}
+
+    <script>
+        // Convertir imagen a base64
+        document.getElementById('personPhotoFile').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function () {
+                const base64String = reader.result.split(',')[1];
+                document.getElementById('personPhoto').value = base64String;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Convertir fechas a formato correcto antes de enviar
+        function prepareSubmission() {
+            const start = document.getElementById('accStartTimeLocal').value;
+            const end = document.getElementById('accEndTimeLocal').value;
+
+            if (start)
+                document.getElementById('accStartTime').value = start.replace('T', ' ') + ':00';
+            if (end)
+                document.getElementById('accEndTime').value = end.replace('T', ' ') + ':00';
+        }
+    </script>
 
     <p><a href="{% url 'home' %}">Volver al inicio</a></p>
 </body>

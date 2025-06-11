@@ -8,5 +8,6 @@ urlpatterns = [
     path("add_person/", views.add_person, name="add_person"),
     path("delete_person_level/", views.delete_person_level, name="delete_person_level"),
     path("get_qr_code/", views.get_qr_code, name="get_qr_code"),
+    path("get_person/", views.get_person, name="get_person"),
     path("admin/", admin.site.urls),
 ]
