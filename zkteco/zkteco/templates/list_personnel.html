@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Listar Personal - ZKTeco{% endblock %}
 
 {% block extra_head %}
@@ -47,6 +47,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+    const DEFAULT_PHOTO = "{% static 'images/default.png' %}";
+
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     const table = new DataTable('#personTable', {
         serverSide: true,
@@ -64,7 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: 'personPhoto',
                 orderable: false,
                 render: data => {
-                    const src = data ? `data:image/jpeg;base64,${data}` : 'https://via.placeholder.com/40';
+                    const src = data
+                            ? `data:image/jpeg;base64,${data}`
+                            : DEFAULT_PHOTO;
                     return `<img src="${src}" class="rounded" style="width:40px;height:40px;object-fit:cover">`;
                 }
             },
