@@ -14,11 +14,11 @@ class ZKBioClient:
         url = urljoin(self.base_url + '/', path.lstrip('/'))
         params = {"access_token": self.access_token}
         try:
-            response = requests.post(url, params=params, data=data, verify=False)
+            response = requests.post(url, params=params, data=data, verify=False)  # verify=False aquí
             response.raise_for_status()
             return response.json()
         except Exception as exc:
-            raise RuntimeError(f"API call failed: {exc}")
+            raise RuntimeError(f"API POST call failed: {exc}")
 
     def get(self, path, params=None):
         """GET request using token in query params."""
@@ -27,13 +27,12 @@ class ZKBioClient:
         params["access_token"] = self.access_token
 
         url = urljoin(self.base_url + '/', path.lstrip('/'))
-
         try:
-            response = requests.get(url, params=params, verify=False)
+            response = requests.get(url, params=params, verify=False)  # verify=False aquí también
             response.raise_for_status()
             return response.json()
         except Exception as exc:
-            raise RuntimeError(f"API call failed: {exc}")
+            raise RuntimeError(f"API GET call failed: {exc}")
 
 # Example usage:
 # from zkteco.zkbio_client import ZKBioClient
