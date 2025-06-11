@@ -78,12 +78,33 @@ def delete_person_level(request):
         {"result": result, "error": error},
     )
 
-
 def get_qr_code(request):
     """Call the Get QR Code API and display the QR as an image."""
     result = None
     qr_base64 = None
     error = None
+
+    if request.method == "POST":
+        pin = request.POST.get("pin", "").strip()
+        if not pin:
+            error = "El PIN es obligatorio."
+        else:
+            client = ZKBioClient()
+            try:
+                api_path = f"api/person/getQrCode/{pin}"
+                result = client.post(api_path, params={"pin": pin})
+                if isinstance(result, dict) and result.get("code") == 0:
+                    qr_base64 = result.get("data")
+                else:
+                    error = "No se pudo obtener el código QR."
+            except Exception as exc:
+                error = str(exc)
+
+    return render(request, "get_qr_code.html", {
+        "result": result,
+        "qr_base64": qr_base64,
+        "error": error,
+    })
 
 def get_person(request):
     """Retrieve person info by pin and display the result."""
@@ -93,24 +114,15 @@ def get_person(request):
     if request.method == "POST":
         pin = request.POST.get("pin", "").strip()
         if not pin:
-            error = "pin is required"
+            error = "El PIN es obligatorio."
         else:
             client = ZKBioClient()
             try:
-                api_path = f"api/person/getQrCode/{pin}"
-                result = client.post(api_path, params={"pin": pin})
-                if isinstance(result, dict) and result.get("code") == 0:
-                    qr_base64 = result.get("data")
-            except Exception as exc:
-                error = str(exc)
-
-    return render(
-        request,
-        "get_qr_code.html",
-        {"result": result, "qr_base64": qr_base64, "error": error},
-    )
                 result = client.get(f"api/person/get/{pin}")
             except Exception as exc:
                 error = str(exc)
 
-    return render(request, "get_person.html", {"result": result, "error": error})
+    return render(request, "get_person.html", {
+        "result": result,
+        "error": error,
+    })
