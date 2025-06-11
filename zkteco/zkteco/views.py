@@ -1,37 +1,54 @@
 from django.shortcuts import render
 from .zkbio_client import ZKBioClient
+import base64
+from datetime import datetime
 
 
 def home(request):
     return render(request, "home.html")
 
 
+def validate_datetime(value):
+    try:
+        datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        return True
+    except ValueError:
+        return False
+
+def is_base64(s):
+    try:
+        return base64.b64encode(base64.b64decode(s)).decode('utf-8') == s
+    except Exception:
+        return False
+
 def add_person(request):
-    """Call the Add Person API and display the result."""
     result = None
     error = None
-    if request.method == "POST":
-        params = {
-            "pin": request.POST.get("pin", "").strip(),
-            "deptCode": request.POST.get("deptCode", "").strip(),
-            "name": request.POST.get("name", "").strip(),
-            "lastName": request.POST.get("lastName", "").strip(),
-            "gender": request.POST.get("gender", "").strip(),
-            "cardNo": request.POST.get("cardNo", "").strip(),
-            "personPhoto": request.POST.get("personPhoto", "").strip(),
-            "accLevelIds": request.POST.get("accLevelIds", "").strip(),
-            "accStartTime": request.POST.get("accStartTime", "").strip(),
-            "accEndTime": request.POST.get("accEndTime", "").strip(),
-        }
 
-        if not params["pin"] or not params["deptCode"] or not params["name"]:
-            error = "pin, deptCode and name are required"
-        else:
-            client = ZKBioClient()
-            try:
-                result = client.post("api/person/add", params=params)
-            except Exception as exc:
-                error = str(exc)
+    if request.method == "POST":
+        try:
+            client = ZKBioClient()     
+            data = {
+                "pin": request.POST.get("pin"),
+                "name": request.POST.get("name"),
+                "deptCode": request.POST.get("deptCode"),
+                "gender": request.POST.get("gender", "M"),
+                "personPwd": request.POST.get("personPwd", "123456"),
+                "cardNo": request.POST.get("cardNo", "000000"),
+                "certNumber": request.POST.get("certNumber", "000000"),
+                "certType": request.POST.get("certType", "2"),
+                "accLevelIds": request.POST.get("accLevelIds", "1"),
+                "accStartTime": request.POST.get("accStartTime", "2024-06-10 00:00:00"),
+                "accEndTime": request.POST.get("accEndTime", "2025-06-10 23:59:59"),
+                "personPhoto": request.POST.get("personPhoto", "")
+            }
+
+            # Filtrar vacíos
+            data = {k: v for k, v in data.items() if v}
+            result = client.post("api/person/add", data=data)
+
+        except Exception as exc:
+            error = str(exc)
 
     return render(request, "add_person.html", {"result": result, "error": error})
 
