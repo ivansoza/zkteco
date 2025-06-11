@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Person</title>
+</head>
+<body>
+    <h1>Add Person</h1>
+    <form method="post">
+        {% csrf_token %}
+        <label for="pin">Pin:</label>
+        <input type="text" name="pin" id="pin" required><br>
+
+        <label for="deptCode">Dept Code:</label>
+        <input type="text" name="deptCode" id="deptCode" required><br>
+
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" required><br>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" name="lastName" id="lastName"><br>
+
+        <label for="gender">Gender:</label>
+        <select name="gender" id="gender">
+            <option value="M">M</option>
+            <option value="F">F</option>
+        </select><br>
+
+        <label for="cardNo">Card No:</label>
+        <input type="text" name="cardNo" id="cardNo"><br>
+
+        <label for="personPhoto">Person Photo (base64):</label>
+        <input type="text" name="personPhoto" id="personPhoto"><br>
+
+        <label for="accLevelIds">Access Level IDs:</label>
+        <input type="text" name="accLevelIds" id="accLevelIds"><br>
+
+        <label for="accStartTime">Access Start Time:</label>
+        <input type="text" name="accStartTime" id="accStartTime"><br>
+
+        <label for="accEndTime">Access End Time:</label>
+        <input type="text" name="accEndTime" id="accEndTime"><br>
+
+        <button type="submit">Add</button>
+    </form>
+
+    {% if result %}
+        <h2>Result</h2>
+        <pre>{{ result|safe }}</pre>
+    {% endif %}
+    {% if error %}
+        <h2>Error</h2>
+        <pre>{{ error }}</pre>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Volver al inicio</a></p>
+</body>
+</html>
