@@ -17,7 +17,8 @@
     {% endif %}
     {% if qr_base64 %}
         <h2>QR Code</h2>
-        <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code">
+        <!-- Use the safe filter so special characters are not escaped -->
+        <img src="data:image/png;base64,{{ qr_base64|safe }}" alt="QR Code">
     {% endif %}
     {% if error %}
         <h2>Error</h2>

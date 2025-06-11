@@ -1,24 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ZKTeco Test Zone</title>
+    <meta charset="utf-8">
+    <title>ZKTeco Demo</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 8px 0;
+        }
+        a.button {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Bienvenido a la zona de pruebas para ZKTeco</h1>
-    <p>
-        Puede probar la API <strong>Delete Person Level</strong> desde el siguiente enlace:
-    </p>
-    <a href="{% url 'delete_person_level' %}">Probar Delete Person Level</a>
-    <p>
-        Puede probar la API <strong>Add Person</strong> desde el siguiente enlace:
-    </p>
-    <a href="{% url 'add_person' %}">Probar Add Person</a>
-    <p>
-        Puede probar la API <strong>Get QR Code</strong> desde el siguiente enlace:
-    </p>
-    <a href="{% url 'get_qr_code' %}">Probar Get QR Code</a>
-        Puede probar la API <strong>Get Person</strong> desde el siguiente enlace:
-    </p>
-    <a href="{% url 'get_person' %}">Probar Get Person</a>
+    <h1>Zona de pruebas ZKTeco</h1>
+    <p>Seleccione una opción para interactuar con la API:</p>
+    <ul>
+        <li><a class="button" href="{% url 'add_person' %}">Agregar Persona</a></li>
+        <li><a class="button" href="{% url 'delete_person_level' %}">Eliminar Niveles de Persona</a></li>
+        <li><a class="button" href="{% url 'get_qr_code' %}">Obtener QR Dinámico</a></li>
+        <li><a class="button" href="{% url 'get_person' %}">Consultar Persona</a></li>
+    </ul>
 </body>
 </html>
