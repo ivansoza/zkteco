@@ -2,85 +2,117 @@ import requests
 from urllib.parse import urljoin
 from django.conf import settings
 class ZKBioClient:
-    """ZKBio client using static token in URL parameters only."""
+    """Cliente ZKBio que usa token estático en query‐string."""
 
     def __init__(self):
-        api_conf = getattr(settings, "ZKBIO_API", {})
-        self.base_url = api_conf.get("BASE_URL", "").rstrip("/")
-        self.access_token = api_conf.get("ACCESS_TOKEN")
+        api_conf        = getattr(settings, "ZKBIO_API", {})
+        self.base_url   = api_conf.get("BASE_URL", "").rstrip("/")
+        self.access_tok = api_conf.get("ACCESS_TOKEN")
 
-    def post(self, path, data=None):
-        """POST with token in query param and data in form-encoded body."""
-        url = urljoin(self.base_url + '/', path.lstrip('/'))
-        params = {"access_token": self.access_token}
+    # ------------------------------------------------------------------
+    # Helpers HTTP
+    # ------------------------------------------------------------------
+
+    def _post(self, path: str, body: dict | None = None):
+        """POST → siempre JSON + token en la URL."""
+        url    = urljoin(self.base_url + "/", path.lstrip("/"))
+        params = {"access_token": self.access_tok}
+
         try:
-            response = requests.post(url, params=params, data=data, verify=False)  # verify=False aquí
-            response.raise_for_status()
-            return response.json()
+            resp = requests.post(
+                url,
+                params=params,
+                json=body or {},                # 👈 cuerpo JSON
+                headers={"Content-Type": "application/json"},
+                verify=False,                   # self-signed cert
+                timeout=10,
+            )
+            resp.raise_for_status()
+            return resp.json()
         except Exception as exc:
             raise RuntimeError(f"API POST call failed: {exc}")
 
-    def get(self, path, params=None):
-        """GET request using token in query params."""
-        if params is None:
-            params = {}
-        params["access_token"] = self.access_token
+    def _get(self, path: str, params: dict | None = None):
+        """GET con token en la URL."""
+        params = (params or {}) | {"access_token": self.access_tok}
+        url    = urljoin(self.base_url + "/", path.lstrip("/"))
 
-        url = urljoin(self.base_url + '/', path.lstrip('/'))
         try:
-            response = requests.get(url, params=params, verify=False)  # verify=False aquí también
-            response.raise_for_status()
-            return response.json()
+            resp = requests.get(url, params=params, verify=False, timeout=10)
+            resp.raise_for_status()
+            return resp.json()
         except Exception as exc:
             raise RuntimeError(f"API GET call failed: {exc}")
 
-    def get_person_list(self, pins="", dept_codes="", page_no=1, page_size=100):
-        """Return paginated personnel list using the getPersonList endpoint."""
-        data = {
+    # ------------------------------------------------------------------
+    # Personas
+    # ------------------------------------------------------------------
+
+    def get_person_list(self, pins: str = "", dept_codes: str = "",
+                        page_no: int = 1, page_size: int = 100):
+        """Lista paginada de personal."""
+        body = {
             "pins": pins,
             "deptCodes": dept_codes,
             "pageNo": page_no,
             "pageSize": page_size,
         }
-        return self.post("api/v2/person/getPersonList", data=data)
+        return self._post("api/v2/person/getPersonList", body)
+
+    def update_person_photo(self, pin: int, person_photo_b64: str):
+        """Actualiza la foto (Base64) de la persona."""
+        body = {"pin": str(pin), "personPhoto": person_photo_b64}
+        return self._post("api/person/updatePersonnelPhoto", body)
+
+    def delete_person(self, pin: int):
+        """
+        Confirmado por Postman:
+        POST /api/person/delete/{pin}?access_token=TOKEN
+        (acepta token vía query‐string y sin body)
+        """
+        url = urljoin(self.base_url + "/", f"api/person/delete/{pin}")
+        resp = requests.post(
+            url,
+            params={"access_token": self.access_tok},
+            verify=False,
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    # ------------------------------------------------------------------
+    # Transacciones
+    # ------------------------------------------------------------------
 
     def get_transactions(
         self,
-        person_pin="",
-        start_date="",
-        end_date="",
-        page_no=1,
-        page_size=1000,
-        gate_only=False,
-        v2=True,
+        person_pin: str = "",
+        start_date: str = "",
+        end_date: str = "",
+        page_no: int = 1,
+        page_size: int = 1000,
+        gate_only: bool = False,
+        v2: bool = True,
     ):
-        """Return paginated access transactions.
-
-        Parameters mirror the API query parameters. If ``gate_only`` is
-        ``True`` the gate transaction endpoint is used. ``v2`` selects the
-        version of the endpoint.
-        """
-
-        base = "psgTransaction/list" if gate_only else "transaction/list"
-        path = f"api/{'v2/' if v2 else ''}{base}"
-
-        params = {
+        """Accesos / transacciones."""
+        base  = "psgTransaction/list" if gate_only else "transaction/list"
+        path  = f"api/{'v2/' if v2 else ''}{base}"
+        query = {
             "personPin": person_pin,
             "startDate": start_date,
             "endDate": end_date,
             "pageNo": page_no,
             "pageSize": page_size,
         }
-
-        return self.get(path, params=params)
+        return self._get(path, query)
 
     # ------------------------------------------------------------------
-    # Device management helpers
+    # Dispositivos
     # ------------------------------------------------------------------
 
-    def get_device_list(self, module="acc", page_no=1, page_size=100, v2=True):
-        """Return a paginated list of devices for the given ``module``."""
-
+    def get_device_list(self, module: str = "acc",
+                        page_no: int = 1, page_size: int = 100, v2: bool = True):
+        """Lista paginada de dispositivos del módulo indicado."""
         if module == "acc":
             path = f"api/{'v2/' if v2 else ''}device/{'list' if v2 else 'accList'}"
         elif module == "psg":
@@ -92,12 +124,10 @@ class ZKBioClient:
         else:
             raise ValueError(f"Unknown module: {module}")
 
-        params = {"pageNo": page_no, "pageSize": page_size}
-        return self.get(path, params=params)
+        return self._get(path, {"pageNo": page_no, "pageSize": page_size})
 
-    def get_device_info(self, module, sn):
-        """Return device information by serial number for a module."""
-
+    def get_device_info(self, module: str, sn: str):
+        """Info de un dispositivo vía serial number."""
         if module == "acc":
             path = "api/device/getAcc"
         elif module == "psg":
@@ -105,26 +135,4 @@ class ZKBioClient:
         else:
             raise ValueError(f"Info endpoint not defined for module: {module}")
 
-        return self.get(path, params={"sn": sn})
-
-
-
-    def delete_person(self, pin: int):
-        """
-        Variante confirmada por Postman:
-        POST /api/person/delete/{pin}?access_token=TOKEN
-        """
-        base = settings.ZKBIO_API["BASE_URL"].rstrip("/")
-        url  = urljoin(base + "/", f"api/person/delete/{pin}")   # pin en la ruta
-        params = {
-            "access_token": settings.ZKBIO_API["ACCESS_TOKEN"]   # ¡solo token!
-        }
-
-        resp = requests.post(url, params=params, verify=False, timeout=10)
-        resp.raise_for_status()         # lanzará si HTTP != 2xx
-        return resp.json()
-
-    def update_person_photo(self, pin: int, person_photo: str):
-        """Update a person's photo using a Base64 encoded image."""
-        data = {"pin": pin, "personPhoto": person_photo}
-        return self.post("api/person/updatePersonnelPhoto", data=data)
+        return self._get(path, {"sn": sn})
